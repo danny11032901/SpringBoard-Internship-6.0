@@ -5,51 +5,97 @@
     <title>Fake Job Detection</title>
     <style>
         body {
-            font-family: Arial;
-            background: #f2f2f2;
+            margin: 0;
+            padding: 0;
+            font-family: "Poppins", sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            width: 450px;
+            padding: 40px 30px;
+            border-radius: 15px;
+            box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
             text-align: center;
-            padding: 40px;
+            animation: fadeIn 0.8s ease;
         }
-        form {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            width: 50%;
-            margin: auto;
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-weight: 600;
+            font-size: 1.8em;
         }
+
+        label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: #444;
+        }
+
         textarea {
-            width: 90%;
+            width: 100%;
             height: 120px;
-            padding: 10px;
-            border-radius: 8px;
             border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 15px;
+            resize: none;
+            transition: all 0.3s ease;
         }
+
+        textarea:focus {
+            border-color: #2575fc;
+            outline: none;
+            box-shadow: 0 0 8px rgba(37, 117, 252, 0.3);
+        }
+
         button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            background-color: #007bff;
+            margin-top: 20px;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
             color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 10px;
             cursor: pointer;
+            transition: 0.3s;
         }
+
         button:hover {
-            background-color: #0056b3;
+            background: linear-gradient(135deg, #2575fc, #6a11cb);
+            transform: translateY(-2px);
         }
+
         .error {
-            color: red;
+            margin-top: 15px;
+            color: #e74c3c;
+            font-weight: 500;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
 <body>
-    <h2>Fake Job Detection System</h2>
-    <form action="/predict" method="POST">
-        <label for="job_description"><b>Enter Job Description:</b></label><br><br>
-        <textarea name="job_description" placeholder="Paste job post text here..."></textarea><br>
-        <button type="submit">Check Authenticity</button>
-    </form>
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% endif %}
+    <div class="container">
+        <h2>Fake Job Detection System</h2>
+        <form action="/predict" method="POST">
+            <label for="job_description">Enter Job Description:</label>
+            <textarea name="job_description" placeholder="Paste job post text here..."></textarea>
+            <button type="submit">Check Authenticity</button>
+        </form>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+    </div>
 </body>
 </html>
