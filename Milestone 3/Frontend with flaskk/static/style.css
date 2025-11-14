@@ -1,0 +1,92 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #4f46e5, #9333ea);
+    color: white;
+}
+
+.container {
+    width: 55%;
+    margin: 50px auto;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 30px;
+    border-radius: 18px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+    text-align: center;
+}
+
+textarea {
+    width: 90%;
+    height: 140px;
+    padding: 12px;
+    border-radius: 12px;
+    border: none;
+    font-size: 16px;
+    outline: none;
+    resize: none;
+    margin-bottom: 20px;
+}
+
+button {
+    padding: 12px 25px;
+    font-size: 16px;
+    border: none;
+    background: #10b981;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: #059669;
+}
+
+.result-card {
+    margin-top: 20px;
+    padding: 20px;
+    background: rgba(0,0,0,0.3);
+    border-radius: 12px;
+}
+
+.history-btn {
+    display: inline-block;
+    margin-top: 20px;
+    background: #fbbf24;
+    padding: 10px 20px;
+    color: black;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.history-btn:hover {
+    background: #f59e0b;
+}
+
+/* History table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 25px;
+    background: white;
+    color: black;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+tr:hover {
+    background: #f3f4f6;
+}
+
+.description {
+    max-width: 350px;
+    word-wrap: break-word;
+}

@@ -1,61 +1,108 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 import joblib
-import pandas as pd
+import csv
 from datetime import datetime
 import os
 
 app = Flask(__name__)
 
-# Load model and vectorizer
+# ------------------------------------------------
+# Load REAL Machine Learning Model + TF-IDF
+# ------------------------------------------------
 model = joblib.load("saved_model/fake_job_model.pkl")
 vectorizer = joblib.load("saved_model/tfidf_vectorizer.pkl")
 
-LOG_FILE = "predictions_log.csv"
-
-# Create CSV file if not exists
-if not os.path.exists(LOG_FILE):
-    df = pd.DataFrame(columns=["job_description", "prediction", "confidence", "timestamp"])
-    df.to_csv(LOG_FILE, index=False)
+CSV_FILE = "predictions_log.csv"
 
 
+# ------------------------------------------------
+# Save prediction to CSV
+# ------------------------------------------------
+def save_to_csv(job_description, prediction, confidence):
+    file_exists = os.path.isfile(CSV_FILE)
+
+    with open(CSV_FILE, "a", newline="", encoding="utf-8") as f:
+        writer = csv.writer(f)
+
+        # Write header only once
+        if not file_exists:
+            writer.writerow(["Timestamp", "Job Description", "Prediction", "Confidence"])
+
+        writer.writerow([
+            datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            job_description,
+            prediction,
+            f"{confidence:.2f}%"
+        ])
+
+
+# ------------------------------------------------
+# HOME PAGE
+# ------------------------------------------------
 @app.route("/")
-def home():
+def index():
     return render_template("index.html")
 
 
+# ------------------------------------------------
+# PREDICT PAGE
+# ------------------------------------------------
 @app.route("/predict", methods=["POST"])
 def predict():
-    job_desc = request.form["job_description"]
+    job_description = request.form["job_description"]
 
-    # Transform input
-    features = vectorizer.transform([job_desc])
+    # Transform text → TF-IDF
+    X = vectorizer.transform([job_description])
 
-    # Prediction + probability
-    pred = model.predict(features)[0]
-    prob = model.predict_proba(features)[0][pred] * 100
+    # Predict
+    pred = model.predict(X)[0]
+    proba = model.predict_proba(X)[0]
+    confidence = max(proba) * 100
 
     label = "Fake Job" if pred == 1 else "Real Job"
 
-    # --- Log to CSV ---
-    log_row = pd.DataFrame([{
-        "job_description": job_desc,
-        "prediction": label,
-        "confidence": f"{prob:.2f}%",
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }])
+    # Save to history CSV
+    save_to_csv(job_description, label, confidence)
 
-    log_row.to_csv(LOG_FILE, mode='a', header=False, index=False)
-
-    return render_template("result.html",
-                           prediction=label,
-                           confidence=f"{prob:.2f}%")
+    return render_template(
+        "result.html",
+        description=job_description,
+        label=label,
+        confidence=f"{confidence:.2f}"
+    )
 
 
+# ------------------------------------------------
+# HISTORY (ONLY LAST 2)
+# ------------------------------------------------
 @app.route("/history")
 def history():
-    df = pd.read_csv(LOG_FILE)
-    return render_template("history.html", tables=df.to_dict(orient="records"))
-    
+    data = []
 
+    if os.path.exists(CSV_FILE):
+        with open(CSV_FILE, "r", encoding="utf-8") as f:
+            data = list(csv.reader(f))
+
+    # Header + last 2 entries
+    latest_two = [data[0]] + data[-2:] if len(data) > 2 else data
+
+    return render_template("history.html", data=latest_two, full=False)
+
+
+# ------------------------------------------------
+# FULL HISTORY
+# ------------------------------------------------
+@app.route("/history/full")
+def full_history():
+    data = []
+
+    if os.path.exists(CSV_FILE):
+        with open(CSV_FILE, "r", encoding="utf-8") as f:
+            data = list(csv.reader(f))
+
+    return render_template("history.html", data=data, full=True)
+
+
+# ------------------------------------------------
 if __name__ == "__main__":
     app.run(debug=True)
