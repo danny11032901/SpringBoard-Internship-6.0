@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Login</title>
+<style>
+body {
+    background: #eef1f7;
+    font-family: Arial;
+    text-align: center;
+    padding: 50px;
+}
+.login-box {
+    background: white;
+    padding: 30px;
+    width: 30%;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+input {
+    padding: 10px;
+    width: 80%;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin: 10px;
+}
+button {
+    padding: 10px 20px;
+    background: #007bff;
+    border: none;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+button:hover {
+    background: #0056b3;
+}
+.error {
+    color: red;
+}
+</style>
+</head>
+<body>
+
+<h2>Admin Login</h2>
+
+<div class="login-box">
+    <form method="POST">
+        <input type="text" name="username" placeholder="Enter username"><br>
+        <input type="password" name="password" placeholder="Enter password"><br>
+        <button type="submit">Login</button>
+    </form>
+
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+</div>
+
+</body>
+</html>

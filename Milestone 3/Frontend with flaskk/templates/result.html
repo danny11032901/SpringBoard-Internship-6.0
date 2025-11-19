@@ -4,21 +4,104 @@
 <meta charset="UTF-8">
 <title>Prediction Result</title>
 <link rel="stylesheet" href="/static/style.css">
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: linear-gradient(135deg, #1c1f26, #2c3240);
+        height: 100vh;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        color: #fff;
+    }
+
+    .result-card {
+        width: 90%;
+        max-width: 500px;
+        max-height: 90vh;
+        overflow: hidden;
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        padding: 30px;
+        border-radius: 18px;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.25);
+        text-align: center;
+        animation: fadeIn 0.6s ease;
+    }
+
+    h2 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        font-size: 26px;
+    }
+
+    .description-box {
+        background: rgba(255,255,255,0.15);
+        padding: 14px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        line-height: 1.5;
+        font-size: 15px;
+
+        /* FIXES FOR YOUR ISSUE */
+        max-height: 180px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+    }
+
+    .result-label {
+        font-weight: bold;
+        color: #00ff9d;
+        font-size: 20px;
+    }
+
+    .confidence-value {
+        color: #ffd700;
+    }
+
+    .btn {
+        display: inline-block;
+        margin-top: 18px;
+        margin-right: 8px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        transition: 0.2s ease;
+    }
+
+    .btn:hover {
+        background: #0056b3;
+        transform: scale(1.03);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
 </head>
 <body>
 
-<div class="container">
+<div class="result-card">
     <h2>📌 Prediction Result</h2>
 
     <p><strong>Description:</strong></p>
-    <p style="background: rgba(255,255,255,0.12); padding: 12px; border-radius: 10px;">{{ description }}</p>
+    <p class="description-box">{{ description }}</p>
 
-    <h3 style="margin-top: 25px;">Result:  
-        <span style="color: #00ff9d;">{{ label }}</span>
+    <h3>
+        Result: <span class="result-label">{{ label }}</span>
     </h3>
 
-    <p style="font-size: 20px;">Confidence:  
-        <strong style="color: #ffd700;">{{ confidence }}%</strong>
+    <p style="font-size: 18px;">
+        Confidence: <strong class="confidence-value">{{ confidence }}%</strong>
     </p>
 
     <a href="/" class="btn">🔙 Home</a>

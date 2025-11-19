@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Admin Dashboard</title>
+<style>
+body {
+    font-family: Arial;
+    text-align: center;
+    background: #f4f6f9;
+    padding: 40px;
+}
+.box {
+    background: white;
+    padding: 20px;
+    width: 40%;
+    margin: auto;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+h3 {
+    margin: 10px;
+}
+a {
+    text-decoration: none;
+    display: block;
+    margin-top: 20px;
+}
+</style>
+</head>
+<body>
+
+<h2>Admin Dashboard</h2>
+
+<div class="box">
+    <h3>Total Predictions: {{ total }}</h3>
+    <h3>Fake Jobs Detected: {{ fake }}</h3>
+    <h3>Real Jobs Detected: {{ real }}</h3>
+
+    <a href="/history">📄 View Prediction History</a>
+    <a href="/logout">🚪 Logout</a>
+</div>
+
+</body>
+</html>
