@@ -1,44 +1,565 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en" class="h-full">
 <head>
-<title>Admin Dashboard</title>
-<style>
-body {
-    font-family: Arial;
-    text-align: center;
-    background: #f4f6f9;
-    padding: 40px;
-}
-.box {
-    background: white;
-    padding: 20px;
-    width: 40%;
-    margin: auto;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-}
-h3 {
-    margin: 10px;
-}
-a {
-    text-decoration: none;
-    display: block;
-    margin-top: 20px;
-}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Dashboard — Fake Job Detector</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* --- THEME & COLORS --- */
+    :root {
+      --bg-dark: #0b1120;
+      --bg-panel: #151e32;
+      --accent-purple: #8b5cf6; /* violet-500 */
+      --accent-cyan: #06b6d4;   /* cyan-500 */
+      --accent-red: #f43f5e;     /* rose-500 */
+      --accent-green: #10b981;   /* emerald-500 */
+      --text-main: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border-color: rgba(255, 255, 255, 0.05);
+    }
+
+    /* --- BASE STYLES --- */
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+      margin: 0;
+      /* Subtle background mesh gradient */
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(139, 92, 246, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.1) 0px, transparent 50%);
+      background-attachment: fixed;
+    }
+
+    /* Scrollbar styling */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    /* --- LAYOUT GRID --- */
+    .app-container {
+      display: grid;
+      grid-template-columns: 80px 1fr; /* Fixed sidebar, flexible main */
+      min-height: 100vh;
+    }
+
+    /* --- SIDEBAR --- */
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(10px);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 0;
+      gap: 24px;
+      z-index: 50;
+    }
+
+    .logo-box {
+      width: 48px; height: 48px;
+      background: linear-gradient(135deg, var(--accent-purple), var(--accent-cyan));
+      border-radius: 12px;
+      display: grid; place-items: center;
+      font-weight: 800; font-size: 18px; color: white;
+      box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .nav-item {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      color: var(--text-muted);
+      display: grid; place-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .nav-item:hover, .nav-item.active {
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+    }
+
+    /* --- MAIN CONTENT --- */
+    .main-content {
+      padding: 24px 32px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Top Navigation Bar */
+    .top-nav {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 32px;
+    }
+    .search-bar {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 12px;
+      width: 400px;
+      transition: border-color 0.2s;
+    }
+    .search-bar:focus-within { border-color: var(--accent-purple); }
+    .search-bar input {
+      background: transparent; border: none; outline: none;
+      color: white; width: 100%; font-size: 14px;
+    }
+
+    /* --- DASHBOARD GRID SYSTEM --- */
+    .dashboard-grid {
+      display: grid;
+      /* The layout fix: 3fr for main column, 1.5fr for side panel */
+      grid-template-columns: 3fr 1.5fr; 
+      gap: 24px;
+      align-items: start;
+    }
+
+    /* Reusable Card Style */
+    .card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* --- HERO SECTION --- */
+    .hero-card {
+      grid-column: 1 / -1; /* Falls back to full width on mobile */
+      background: linear-gradient(to right, #1e293b, #0f172a);
+      display: grid;
+      grid-template-columns: 1.5fr 1fr; /* Text vs Image split */
+      padding: 0; /* Reset padding for internal layout */
+      align-items: stretch;
+    }
+    
+    .hero-content { padding: 32px; display: flex; flex-direction: column; justify-content: center; }
+    
+    /* The new "Image" Replacement Area */
+    .hero-visual {
+      position: relative;
+      background: radial-gradient(circle at center, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+      display: flex; align-items: center; justify-content: center;
+      border-left: 1px solid var(--border-color);
+      overflow: hidden;
+    }
+    /* Animated circles for the hero visual */
+    .pulse-circle {
+      position: absolute;
+      border-radius: 50%;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      animation: pulse 3s infinite;
+    }
+    @keyframes pulse {
+      0% { width: 50px; height: 50px; opacity: 1; }
+      100% { width: 300px; height: 300px; opacity: 0; }
+    }
+
+    /* KPI Pills inside Hero */
+    .stats-row { display: flex; gap: 16px; margin-top: 24px; flex-wrap: wrap; }
+    .stat-item {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-color);
+      padding: 12px 16px; border-radius: 12px;
+      min-width: 120px;
+    }
+
+    /* --- MINI CARDS (Row 2 Left) --- */
+    .kpi-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+      margin-top: 24px;
+    }
+    /* Make them fill height */
+    .kpi-grid .card { height: 100%; display: flex; flex-direction: column; justify-content: space-between; }
+
+    /* --- ACTIVITY FEED --- */
+    .activity-item {
+      display: flex; gap: 16px; align-items: flex-start;
+      padding: 12px 0;
+      border-bottom: 1px dashed var(--border-color);
+    }
+    .activity-item:last-child { border-bottom: none; }
+    .icon-box {
+      width: 40px; height: 40px; border-radius: 10px;
+      display: grid; place-items: center;
+      font-size: 18px; flex-shrink: 0;
+    }
+
+    /* --- TABLES --- */
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; color: var(--text-muted); padding: 12px 8px; font-weight: 600; border-bottom: 1px solid var(--border-color); }
+    td { padding: 12px 8px; border-bottom: 1px solid var(--border-color); }
+    tr:last-child td { border-bottom: none; }
+
+    /* --- UTILITIES --- */
+    .text-gradient { background: linear-gradient(to right, #fff, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .badge { padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
+    .badge-red { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.2); }
+    .badge-green { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); }
+
+    /* --- RESPONSIVE --- */
+    @media (max-width: 1200px) {
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .hero-card { grid-template-columns: 1fr; }
+      .hero-visual { display: none; } /* Hide visual on tablet to save space */
+    }
+    @media (max-width: 768px) {
+      .app-container { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .kpi-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-<h2>Admin Dashboard</h2>
+  <div class="app-container">
 
-<div class="box">
-    <h3>Total Predictions: {{ total }}</h3>
-    <h3>Fake Jobs Detected: {{ fake }}</h3>
-    <h3>Real Jobs Detected: {{ real }}</h3>
+    <aside class="sidebar">
+      <div class="logo-box">FJ</div>
+      
+      <div class="nav-item active" title="Dashboard">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+      </div>
+      <div class="nav-item" title="Analysis">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+      </div>
+      <div class="nav-item" title="Users">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+      </div>
+      
+      <div style="margin-top: auto; display: flex; flex-direction: column; gap: 24px;">
+        <div class="nav-item" title="Settings">
+            <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+      </div>
+    </aside>
 
-    <a href="/history">📄 View Prediction History</a>
-    <a href="/logout">🚪 Logout</a>
-</div>
+    <main class="main-content">
+      
+      <header class="top-nav">
+        <div class="search-bar">
+          <svg width="18" height="18" class="text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          <input type="text" placeholder="Search jobs, companies, hashes..." />
+        </div>
+        <div class="flex items-center gap-4">
+           <div class="text-right hidden sm:block">
+             <div class="text-xs text-gray-400">Logged in as</div>
+             <div class="text-sm font-bold text-white">Administrator</div>
+           </div>
+           <div class="h-10 w-10 rounded-full bg-gradient-to-br from-purple-500 to-cyan-500 border-2 border-white/10"></div>
+        </div>
+      </header>
 
+      <div class="dashboard-grid">
+        
+        <div class="flex flex-col gap-6">
+          
+          <div class="card hero-card">
+            <div class="hero-content">
+              <div class="flex justify-between items-start">
+                <div>
+                   <h2 class="text-2xl font-bold text-white mb-1">Analytics Overview</h2>
+                   <p class="text-sm text-gray-400">Platform health & detection monitoring</p>
+                </div>
+                <div class="text-right">
+                   <div class="text-xs text-cyan-400 font-mono mb-1">LIVE</div>
+                   <div class="font-bold text-lg">Nov 20</div>
+                </div>
+              </div>
+
+              <div class="stats-row">
+                <div class="stat-item">
+                  <div class="text-xs text-gray-400 mb-1">Total Scans</div>
+                  <div class="text-xl font-bold text-white" id="val-total">1,248</div>
+                  <div class="h-1 w-full bg-gray-700 mt-2 rounded overflow-hidden"><div class="h-full bg-purple-500 w-3/4"></div></div>
+                </div>
+                <div class="stat-item">
+                  <div class="text-xs text-gray-400 mb-1">Fake Detected</div>
+                  <div class="text-xl font-bold text-rose-400" id="val-fake">142</div>
+                   <div class="h-1 w-full bg-gray-700 mt-2 rounded overflow-hidden"><div class="h-full bg-rose-500 w-1/3"></div></div>
+                </div>
+                <div class="stat-item">
+                  <div class="text-xs text-gray-400 mb-1">Accuracy</div>
+                  <div class="text-xl font-bold text-emerald-400">98.2%</div>
+                   <div class="h-1 w-full bg-gray-700 mt-2 rounded overflow-hidden"><div class="h-full bg-emerald-500 w-[98%]"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hero-visual">
+               <div class="pulse-circle" style="animation-delay: 0s;"></div>
+               <div class="pulse-circle" style="animation-delay: 1s;"></div>
+               
+               <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="url(#grad1)" stroke-width="1" class="relative z-10 drop-shadow-[0_0_15px_rgba(139,92,246,0.5)]">
+                 <defs>
+                   <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                     <stop offset="0%" style="stop-color:#8b5cf6;stop-opacity:1" />
+                     <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+                   </linearGradient>
+                 </defs>
+                 <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+               </svg>
+            </div>
+          </div>
+
+          <div class="kpi-grid">
+            
+            <div class="card">
+              <div class="flex justify-between items-center mb-4">
+                 <div class="w-10 h-10 rounded-lg bg-purple-500/20 text-purple-400 grid place-items-center">
+                   <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                 </div>
+                 <span class="text-xs font-mono text-emerald-400">+12%</span>
+              </div>
+              <div>
+                <div class="text-2xl font-bold">86</div>
+                <div class="text-xs text-gray-400">New detections</div>
+              </div>
+              <div class="mt-4 h-10">
+                <canvas id="sparkLine1"></canvas>
+              </div>
+            </div>
+
+            <div class="card">
+               <div class="flex justify-between items-start mb-2">
+                 <div class="text-gray-400 text-sm font-semibold">Model Health</div>
+                 <span class="badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded px-2 py-0.5 text-[10px]">v2.4</span>
+               </div>
+               <div class="mt-auto">
+                 <div class="flex justify-between text-xs mb-1">
+                   <span>Precision</span>
+                   <span class="text-white">99.1%</span>
+                 </div>
+                 <div class="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden">
+                   <div class="bg-cyan-400 h-full w-[99%]"></div>
+                 </div>
+                 
+                 <div class="flex justify-between text-xs mb-1 mt-3">
+                   <span>Recall</span>
+                   <span class="text-white">94.5%</span>
+                 </div>
+                 <div class="w-full bg-gray-700 h-1.5 rounded-full overflow-hidden">
+                   <div class="bg-purple-400 h-full w-[94%]"></div>
+                 </div>
+               </div>
+            </div>
+
+            <div class="card">
+              <div class="flex justify-between items-center mb-4">
+                <div class="w-10 h-10 rounded-lg bg-rose-500/20 text-rose-400 grid place-items-center">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                </div>
+                <span class="text-2xl font-bold">5</span>
+              </div>
+              <div class="text-sm text-gray-300">High Severity Alerts</div>
+              <div class="text-xs text-gray-500 mt-1">Requires immediate action</div>
+            </div>
+
+          </div>
+
+          <div class="card">
+            <div class="flex justify-between items-center mb-4">
+              <h3 class="font-bold text-white">Live Activity Feed</h3>
+              <span class="text-xs text-gray-500 animate-pulse">● Monitoring</span>
+            </div>
+            <div class="flex flex-col gap-2">
+               <div class="activity-item">
+                 <div class="icon-box bg-rose-500/10 text-rose-500">⚠️</div>
+                 <div>
+                   <div class="text-sm font-semibold text-gray-200">Malicious Job Post Detected</div>
+                   <div class="text-xs text-gray-500">"Data Entry Remote" • 2 mins ago</div>
+                 </div>
+               </div>
+               <div class="activity-item">
+                 <div class="icon-box bg-emerald-500/10 text-emerald-500">✓</div>
+                 <div>
+                   <div class="text-sm font-semibold text-gray-200">Company Verified</div>
+                   <div class="text-xs text-gray-500">TechCorp Solutions • 15 mins ago</div>
+                 </div>
+               </div>
+               <div class="activity-item">
+                 <div class="icon-box bg-purple-500/10 text-purple-500">🔍</div>
+                 <div>
+                   <div class="text-sm font-semibold text-gray-200">Manual Review Requested</div>
+                   <div class="text-xs text-gray-500">User #88291 flagged a post • 1 hr ago</div>
+                 </div>
+               </div>
+            </div>
+          </div>
+
+        </div> <div class="flex flex-col gap-6">
+          
+          <div class="card">
+            <div class="flex justify-between items-center mb-4">
+              <div>
+                <h3 class="font-bold text-white">Trend Analysis</h3>
+                <div class="text-xs text-gray-400">Fake vs Real posts (30d)</div>
+              </div>
+            </div>
+            <div class="h-[200px] w-full">
+               <canvas id="mainChart"></canvas>
+            </div>
+          </div>
+
+          <div class="card flex items-center gap-4">
+             <div class="flex-1">
+               <div class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-1">Distribution</div>
+               <div class="text-2xl font-bold text-white">42 / 86</div>
+               <div class="text-xs text-rose-400 mt-1">High volume of fake entries today</div>
+             </div>
+             <div class="h-[120px] w-[120px]">
+               <canvas id="donutChart"></canvas>
+             </div>
+          </div>
+
+          <div class="card flex-grow">
+            <div class="flex justify-between items-center mb-4">
+               <h3 class="font-bold text-white">Recent Entries</h3>
+               <button class="text-xs text-cyan-400 hover:text-cyan-300">View All</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Job Title</th>
+                    <th>Status</th>
+                    <th>Conf.</th>
+                  </tr>
+                </thead>
+                <tbody id="table-body">
+                   </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div> </div>
+    </main>
+  </div>
+
+  <script>
+    // --- 1. Mini Sparkline ---
+    new Chart(document.getElementById('sparkLine1'), {
+      type: 'bar',
+      data: {
+        labels: ['M','T','W','T','F','S','S'],
+        datasets: [{
+          data: [5, 10, 8, 12, 15, 10, 8],
+          backgroundColor: '#8b5cf6',
+          borderRadius: 4,
+          barThickness: 6
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { display: false }, y: { display: false } }
+      }
+    });
+
+    // --- 2. Main Line Chart ---
+    const ctxMain = document.getElementById('mainChart').getContext('2d');
+    // Create gradient
+    let gradientFake = ctxMain.createLinearGradient(0, 0, 0, 200);
+    gradientFake.addColorStop(0, 'rgba(244, 63, 94, 0.2)'); // rose
+    gradientFake.addColorStop(1, 'rgba(244, 63, 94, 0)');
+
+    let gradientReal = ctxMain.createLinearGradient(0, 0, 0, 200);
+    gradientReal.addColorStop(0, 'rgba(16, 185, 129, 0.2)'); // emerald
+    gradientReal.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+    new Chart(ctxMain, {
+      type: 'line',
+      data: {
+        labels: Array.from({length: 10}, (_, i) => i + 1),
+        datasets: [
+          {
+            label: 'Fake',
+            data: [12, 19, 15, 25, 22, 30, 28, 35, 20, 42],
+            borderColor: '#f43f5e', // rose-500
+            backgroundColor: gradientFake,
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 0,
+            pointHoverRadius: 4
+          },
+          {
+            label: 'Real',
+            data: [20, 25, 22, 28, 35, 32, 40, 45, 38, 50],
+            borderColor: '#10b981', // emerald-500
+            backgroundColor: gradientReal,
+            borderWidth: 2,
+            tension: 0.4,
+            fill: true,
+            pointRadius: 0,
+            pointHoverRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { display: false },
+          y: { 
+            border: { display: false }, 
+            grid: { color: 'rgba(255,255,255,0.05)' },
+            ticks: { color: '#64748b', font: { size: 10 } } 
+          }
+        }
+      }
+    });
+
+    // --- 3. Donut Chart ---
+    new Chart(document.getElementById('donutChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Fake', 'Real'],
+        datasets: [{
+          data: [42, 86],
+          backgroundColor: ['#f43f5e', '#10b981'],
+          borderWidth: 0,
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '75%',
+        plugins: { legend: { display: false } }
+      }
+    });
+
+    // --- 4. Populate Table ---
+    const tableData = [
+      { title: "Senior Frontend Dev", status: "Fake", conf: 98 },
+      { title: "Data Entry Remote", status: "Fake", conf: 88 },
+      { title: "Cloud Engineer", status: "Real", conf: 92 },
+      { title: "Marketing Manager", status: "Real", conf: 85 },
+      { title: "Part-time Helper", status: "Fake", conf: 76 },
+    ];
+
+    const tbody = document.getElementById('table-body');
+    tableData.forEach(row => {
+      const tr = document.createElement('tr');
+      const badgeClass = row.status === 'Fake' ? 'badge-red' : 'badge-green';
+      tr.innerHTML = `
+        <td class="font-medium text-gray-300">${row.title}</td>
+        <td><span class="badge ${badgeClass}">${row.status}</span></td>
+        <td class="text-gray-500">${row.conf}%</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  </script>
 </body>
 </html>

@@ -1,27 +1,233 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="en" class="h-full bg-slate-900">
 <head>
-    <meta charset="UTF-8">
-    <title>Fake Job Detector</title>
-    <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Fake Job Detector - Home</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      overflow-x: hidden;
+    }
+
+    /* Blob styles with animated gradient and morphing */
+    .blob {
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.35;
+      filter: blur(100px);
+      animation: float 25s infinite alternate ease-in-out, morph 40s infinite alternate ease-in-out;
+      z-index: 0;
+    }
+
+    .blob1 { width: 500px; height: 500px; background: linear-gradient(45deg, #a78bfa, #7c3aed); top: -150px; left: -150px; animation-delay: 0s; }
+    .blob2 { width: 400px; height: 400px; background: linear-gradient(45deg, #60a5fa, #2563eb); top: 200px; left: 60%; animation-delay: 3s; }
+    .blob3 { width: 550px; height: 550px; background: linear-gradient(45deg, #14b8a6, #0d9488); top: 60%; left: 40%; animation-delay: 6s; }
+
+    @keyframes float {
+      0% { transform: translate3d(0,0,0) scale(1); }
+      50% { transform: translate3d(50px,-30px,0) scale(1.1); }
+      100% { transform: translate3d(-30px,60px,0) scale(0.95); }
+    }
+
+    @keyframes morph {
+      0% { border-radius: 40% 60% 60% 40% / 55% 40% 60% 45%; }
+      50% { border-radius: 55% 45% 50% 50% / 45% 60% 40% 55%; }
+      100% { border-radius: 40% 60% 60% 40% / 55% 40% 60% 45%; }
+    }
+
+    /* Fade and slide up animation for form */
+    .fade-slide-up {
+      transform: translateY(40px);
+      opacity: 0;
+      transition: all 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+    }
+    .fade-slide-up.show {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Glassmorphism for form and cards */
+    .glass {
+      background: rgba(30, 41, 59, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+
+    /* Buttons with smooth gradient hover and shadow */
+    button {
+      transition: all 0.3s ease-in-out;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+    }
+
+    /* Custom scrollbar */
+    textarea::-webkit-scrollbar { width: 8px; }
+    textarea::-webkit-scrollbar-thumb { background-color: #818cf8; border-radius: 4px; }
+    textarea::-webkit-scrollbar-track { background-color: transparent; }
+
+    /* Modern counter styling */
+    .counter {
+      font-size: 2.8rem;
+      font-weight: 900;
+      letter-spacing: -0.05em;
+      line-height: 1;
+      color: #f0f0f0;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+      user-select: none;
+    }
+
+    /* Cards hover effect */
+    .card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    }
+  </style>
 </head>
-<body>
+<body class="h-full relative overflow-hidden">
 
-<div class="container">
-    <h2 style="margin-bottom: 10px;">🕵️‍♂️ Fake Job Posting Detector</h2>
-    <p>Paste the job description below and detect scams instantly.</p>
+  <!-- Floating background blobs -->
+  <div class="blob blob1"></div>
+  <div class="blob blob2"></div>
+  <div class="blob blob3"></div>
 
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% endif %}
+  <!-- Navigation -->
+  <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-slate-900/60 border-b border-white/10 shadow-lg">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center gap-3 cursor-default select-none">
+        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-3xl drop-shadow-lg">🕵️</div>
+        <span class="text-2xl font-extrabold tracking-wide text-white">Fake Job Detector</span>
+      </div>
+      <div class="flex gap-3 items-center">
+        <a href="/" class="px-5 py-2 text-base font-semibold rounded-lg bg-white/10 text-white hover:bg-white/20 active:scale-95 transition">Home</a>
+        <a href="/history" class="px-5 py-2 text-base font-semibold rounded-lg text-gray-300 hover:text-white hover:bg-white/10 active:scale-95 transition">History</a>
+        <a href="/admin_login" class="px-5 py-2 text-base font-semibold rounded-lg bg-indigo-700 hover:bg-indigo-800 text-white active:scale-95 transition">Admin Login</a>
+      </div>
+    </div>
+  </nav>
 
-    <form action="/predict" method="POST">
-        <textarea name="job_description" placeholder="Enter full job description..." required></textarea>
-        <button type="submit">🔍 Analyze Job Posting</button>
-    </form>
+  <!-- Hero + Form Container -->
+  <main class="pt-28 flex flex-col lg:flex-row items-center justify-center gap-16 max-w-7xl mx-auto px-6 relative z-10">
 
-    <a href="/history" class="history-btn">📜 View Prediction History</a>
-</div>
+    <!-- Hero Text -->
+    <section class="max-w-xl space-y-8 animate-slide-up text-white">
+      <h1 class="text-6xl font-extrabold leading-tight">
+        Detect Fake Jobs <span class="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">Instantly</span>
+      </h1>
+      <p class="text-lg text-gray-300 max-w-lg">
+        Analyze job postings in real-time to protect yourself from fraudulent listings. Stay safe, stay informed.
+      </p>
+      <button id="showFormBtn" class="px-8 py-4 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-indigo-500/70 active:scale-95 text-white font-bold transition shadow-lg drop-shadow-lg">
+        Analyze Now
+      </button>
+
+      <!-- How it works section -->
+      <div class="mt-12 bg-slate-800/60 backdrop-blur-xl p-6 rounded-3xl shadow-lg max-w-md">
+        <h2 class="text-3xl font-semibold mb-4 text-white">How It Works</h2>
+        <ol class="list-decimal list-inside space-y-3 text-gray-300 text-lg leading-relaxed">
+          <li>Paste the job posting text into our analyzer.</li>
+          <li>Our AI examines keywords and patterns to detect fraud.</li>
+          <li>Receive an instant and reliable authenticity verdict.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- Enlarged Form -->
+    <section id="jobForm" class="w-full lg:w-[42rem] rounded-3xl border border-white/20 shadow-xl backdrop-blur-2xl bg-slate-900/90 p-12 fade-slide-up max-w-2xl">
+      <h2 class="text-4xl font-bold mb-8 text-white">Analyze Job Posting</h2>
+      <form action="/predict" method="POST" class="space-y-6">
+        <textarea 
+          name="job_description" 
+          rows="12" 
+          required 
+          placeholder="Paste the full job posting here..." 
+          class="w-full resize-none rounded-2xl border border-white/20 bg-black/50 px-6 py-6 text-white placeholder-gray-400 text-lg shadow-inner focus:outline-none focus:ring-4 focus:ring-indigo-500/70 transition"
+        ></textarea>
+        <button type="submit" class="w-full rounded-2xl px-10 py-6 text-xl text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:scale-[1.05] active:scale-[0.95] transition font-bold shadow-lg drop-shadow-lg">
+          Analyze
+        </button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Stats Section -->
+  <section class="max-w-7xl mx-auto mt-20 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 px-6">
+    <div class="bg-slate-800/70 backdrop-blur-xl p-7 rounded-3xl text-center shadow-lg hover:scale-105 transition transform cursor-default">
+      <div class="counter" data-target="12000">0</div>
+      <p class="mt-3 text-gray-300 font-semibold uppercase tracking-wide">Total Analyses</p>
+    </div>
+    <div class="bg-slate-800/70 backdrop-blur-xl p-7 rounded-3xl text-center shadow-lg hover:scale-105 transition transform cursor-default">
+      <div class="counter" data-target="8500">0</div>
+      <p class="mt-3 text-gray-300 font-semibold uppercase tracking-wide">Fake Jobs Detected</p>
+    </div>
+    <div class="bg-slate-800/70 backdrop-blur-xl p-7 rounded-3xl text-center shadow-lg hover:scale-105 transition transform cursor-default">
+      <div class="counter" data-target="5000">0</div>
+      <p class="mt-3 text-gray-300 font-semibold uppercase tracking-wide">Affected People</p>
+    </div>
+    <div class="bg-slate-800/70 backdrop-blur-xl p-7 rounded-3xl text-center shadow-lg hover:scale-105 transition transform cursor-default">
+      <div class="counter" data-target="3000">0</div>
+      <p class="mt-3 text-gray-300 font-semibold uppercase tracking-wide">Users Protected</p>
+    </div>
+    <div class="bg-slate-800/70 backdrop-blur-xl p-7 rounded-3xl text-center shadow-lg hover:scale-105 transition transform cursor-default">
+      <div class="counter" data-target="97">0</div>
+      <p class="mt-3 text-gray-300 font-semibold uppercase tracking-wide">Success Rate (%)</p>
+    </div>
+  </section>
+
+  <script>
+    // Show/hide form animation
+    const showFormBtn = document.getElementById('showFormBtn');
+    const jobForm = document.getElementById('jobForm');
+    showFormBtn.addEventListener('click', () => {
+      jobForm.classList.add('show');
+      jobForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+
+    // Counter animation for stats
+    const counters = document.querySelectorAll('.counter');
+    counters.forEach(counter => {
+      const updateCount = () => {
+        const target = +counter.getAttribute('data-target');
+        let count = +counter.innerText;
+        const increment = target / 150;
+        if(count < target){
+          count = Math.min(target, count + increment);
+          counter.innerText = Math.floor(count);
+          requestAnimationFrame(updateCount);
+        } else {
+          counter.innerText = target;
+        }
+      }
+      updateCount();
+    });
+
+    // Make floating blobs follow mouse subtly for depth effect
+    const blobs = document.querySelectorAll('.blob');
+    document.addEventListener('mousemove', e => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      blobs.forEach((blob, i) => {
+        const offset = (i + 1) * 15;
+        blob.style.transform = `translate(${x*offset - offset/2}px, ${y*offset - offset/2}px)`;
+      });
+    });
+  </script>
 
 </body>
 </html>
